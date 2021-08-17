@@ -14,15 +14,13 @@ app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
+// For testing: curl -d '{"bookName":333}' -H "Content-Type: application/json" -X POST http://localhost:3000/book
 app.post('/book', (req, res) => {
     const book = req.body;
-
     // Output the book to the console for debugging
-    console.log(book);
+    console.log(`Received body: `, book);
     books.push(book);
-
-    console.log("Books: ", book)
-
+    console.log("Books: ", books)
     res.send('Book is added to the database');
 });
 
