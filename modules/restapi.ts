@@ -70,13 +70,16 @@ export class RestApi {
             res.send(data)
         })
 
-        this.app.patch(`${endpointName}/:id`, (req, res) => {
+        const updateRecordWithNewValues = (req, res) => {
             const id = Number(req.params['id'])
             const data = req.body
             const updatedRecord = restCollection.updateRecordById(id, data)
             const updatedData = updatedRecord.toData()
             res.send(updatedData)
-        })
+        }
+
+        this.app.patch(`${endpointName}/:id`, updateRecordWithNewValues)
+        this.app.put(`${endpointName}/:id`, updateRecordWithNewValues)
     }
 
     public setupExpress() : void {
