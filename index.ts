@@ -1,8 +1,6 @@
 import {Record, RestCollection, RestApi} from "./modules/restapi"
 
 // Database interface
-let tickets = []
-let people = []
 
 class ExampleRecord implements Record {
     private _id : number
@@ -16,14 +14,21 @@ class ExampleRecord implements Record {
     public name : string
     public age : number
 
-    constructor(id : number, name : string, age : number) {
-        this.name = name
-        this.age = age
+    constructor(data : any) {
+        console.log("data", data)
+        this.name = data.name
+        this.age = data.age
+    }
+
+    updateRecord(data: any): void {
+        for (const key in data) {
+            this[key] = data[key]
+        }
     }
 
     toData() {
         return {id: this._id, name: this.name, age: this.age}
-    }
+    }    
 }
 
 class VolatileRestCollection implements RestCollection {
@@ -41,8 +46,17 @@ class VolatileRestCollection implements RestCollection {
         this.nextId = 0 
     }
 
+    updateRecordById(id: number, data: any): Record {
+        let record = this.collection.find((element) => element.id == id)
+        if (record == undefined) {
+            throw new Error("ID not exists")
+        }
+        record.updateRecord(data)
+        return record
+    }
+
     dataToRecord(data : any) : ExampleRecord {
-        return new ExampleRecord(10, "kjjj", 4)
+        return new ExampleRecord(data)
     }
 
     insert(record : Record) : number {
