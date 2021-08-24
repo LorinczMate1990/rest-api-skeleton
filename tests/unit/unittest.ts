@@ -1,7 +1,7 @@
 import { expect } from "chai"
 import bent from "bent"
-import {Record, RestCollection, RestApi} from "../../modules/restapi"
-import { Type } from "typescript"
+import {Record, RestApi} from "../../modules/restapi"
+import { VolatileRestCollection } from "../../modules/volatile-rest-collection"
 
 class ExampleRecord implements Record {
     public name : string
@@ -43,78 +43,6 @@ class SubExampleRecord implements Record {
     toData() {
         return {id: this.id, color: this.color, ownerExampleId: this.ownerExampleId}
     }    
-}
-
-class VolatileRestCollection implements RestCollection {
-    private _name : string
-    public collection : Record[]
-    private nextId : number
-    private SpecificRecord : new (data: any) => Record
-
-    get name(): string {
-        this.collection = [];
-        return this._name
-    }
-    
-    constructor(name : string, SpecificRecord : new (data: any) => Record) {
-        this._name = name
-        this.nextId = 0 
-        this.SpecificRecord = SpecificRecord
-    }
-    getAllRecordsByField(fieldname: string, fieldvalue: any): Record[] {
-        return this.collection.filter((record) => record[fieldname] == fieldvalue)
-    }
-    deleteAllRecordsByField(fieldname: string, fieldvalue: any): Number {
-        const originalLength = this.collection.length
-        this.collection = this.collection.filter((record) => record[fieldname] != fieldvalue)
-        const newLength = this.collection.length
-        return originalLength - newLength
-    }
-    getUpdatedRecordById(id: number, data: any): Record {
-        const record = this.collection.find((element) => element.id == id)
-        if (record == undefined) {
-            throw new Error("ID does not exist")
-        }
-        
-        const copyRecord = new this.SpecificRecord(record.toData())
-        copyRecord.updateRecord(data)
-        return copyRecord
-    }
-    deleteRecordById(id: number): Record {
-        const record = this.getRecordById(id)
-        this.deleteAllRecordsByField("id", id)
-        return record
-    }
-
-    updateRecordById(id: number, data: any): Record {
-        let record = this.collection.find((element) => element.id == id)
-        if (record == undefined) {
-            throw new Error("ID not exists")
-        }
-        record.updateRecord(data)
-        return record
-    }
-
-    dataToRecord(data : any) : Record {
-        return new this.SpecificRecord(data)
-    }
-
-    insert(data : any) : number {
-        const record = this.dataToRecord(data)
-        record.id = this.nextId
-        this.nextId++
-        this.collection.push(record)
-        return record.id
-    }
-
-    getRecordById(id : number) : Record {
-        let ret = this.collection.find((element) => element.id == id)
-        return ret
-    }
-
-    getAllRecords() : Record[] {
-        return this.collection;
-    }
 }
 
 describe("Simple test cases", () => {

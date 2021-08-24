@@ -1,25 +1,10 @@
-
 import express from "express"
 import cors from "cors"
 
-export interface Record {
-    id : number
-    toData() : any
-    updateRecord(data : any) : void
-}
-
-export interface RestCollection {
-    get name() : string
-    dataToRecord(data : any) : Record
-    insert(data : any) : number
-    getRecordById(id : number) : Record
-    getAllRecordsByField(fieldname : string, fieldvalue : any) : Record[]
-    deleteAllRecordsByField(fieldname : string, fieldvalue : any) : Number
-    getAllRecords() : Record[]
-    getUpdatedRecordById(id : number, data : any) : Record
-    updateRecordById(id : number, data : any) : Record
-    deleteRecordById(id : number) : Record
-}
+import { Record } from "./record"
+export { Record } from "./record"
+import { RestCollection } from "./rest-collection"
+export { RestCollection } from "./rest-collection"
 
 class Constraint {
     public ownerCollection : RestCollection 
