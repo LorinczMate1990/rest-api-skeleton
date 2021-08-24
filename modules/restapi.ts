@@ -123,6 +123,9 @@ export class RestApi {
         this.app.get(`${endpointName}/:id`, (req, res) => {
             const id = Number(req.params['id'])
             const record = restCollection.getRecordById(id)
+            if (record == undefined) {
+                throw Error("TODO : Record not found, but this shoulnd't be internal errpr")
+            }
             const data = record.toData()
             res.send(data)
         })
