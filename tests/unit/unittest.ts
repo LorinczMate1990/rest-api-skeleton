@@ -1,6 +1,7 @@
 import { expect } from "chai"
 import bent from "bent"
 import {Record, RestCollection, RestApi} from "../../modules/restapi"
+import { Type } from "typescript"
 
 class ExampleRecord implements Record {
     public name : string
@@ -44,19 +45,21 @@ class SubExampleRecord implements Record {
     }    
 }
 
-class VolatileRestSubCollection implements RestCollection {
+class VolatileRestCollection implements RestCollection {
     private _name : string
-    public collection : SubExampleRecord[]
+    public collection : Record[]
     private nextId : number
+    private SpecificRecord : new (data: any) => Record
 
     get name(): string {
         this.collection = [];
         return this._name
     }
     
-    constructor(_name : string) {
-        this._name = _name
+    constructor(name : string, SpecificRecord : new (data: any) => Record) {
+        this._name = name
         this.nextId = 0 
+        this.SpecificRecord = SpecificRecord
     }
     getAllRecordsByField(fieldname: string, fieldvalue: any): Record[] {
         return this.collection.filter((record) => record[fieldname] == fieldvalue)
@@ -73,7 +76,7 @@ class VolatileRestSubCollection implements RestCollection {
             throw new Error("ID does not exist")
         }
         
-        const copyRecord = new SubExampleRecord(record.toData())
+        const copyRecord = new this.SpecificRecord(record.toData())
         copyRecord.updateRecord(data)
         return copyRecord
     }
@@ -92,18 +95,16 @@ class VolatileRestSubCollection implements RestCollection {
         return record
     }
 
-    dataToRecord(data : any) : SubExampleRecord {
-        return new SubExampleRecord(data)
+    dataToRecord(data : any) : Record {
+        return new this.SpecificRecord(data)
     }
 
-    insert(record : Record) : number {
-        if (record instanceof SubExampleRecord) {
-            record.id = this.nextId
-            this.nextId++
-            this.collection.push(record)
-            return record.id
-        }
-        throw new Error("This is not an SubExampleRecord")
+    insert(data : any) : number {
+        const record = this.dataToRecord(data)
+        record.id = this.nextId
+        this.nextId++
+        this.collection.push(record)
+        return record.id
     }
 
     getRecordById(id : number) : Record {
@@ -115,78 +116,6 @@ class VolatileRestSubCollection implements RestCollection {
         return this.collection;
     }
 }
-
-class VolatileRestCollection implements RestCollection {
-    private _name : string
-    public collection : ExampleRecord[]
-    private nextId : number
-
-    get name(): string {
-        this.collection = [];
-        return this._name
-    }
-    
-    constructor(_name : string) {
-        this._name = _name
-        this.nextId = 0 
-    }
-    getAllRecordsByField(fieldname: string, fieldvalue: any): Record[] {
-        return this.collection.filter((record) => record[fieldname] == fieldvalue)
-    }
-    deleteAllRecordsByField(fieldname: string, fieldvalue: any): Number {
-        const originalLength = this.collection.length
-        this.collection = this.collection.filter((record) => record[fieldname] != fieldvalue)
-        const newLength = this.collection.length
-        return originalLength - newLength
-    }
-    getUpdatedRecordById(id: number, data: any): Record {
-        const record = this.collection.find((element) => element.id == id)
-        if (record == undefined) {
-            throw new Error("ID does not exist")
-        }
-        
-        const copyRecord = new ExampleRecord(record.toData())
-        copyRecord.updateRecord(data)
-        return copyRecord
-    }
-    deleteRecordById(id: number): Record {
-        const record = this.getRecordById(id)
-        this.deleteAllRecordsByField("id", id)
-        return record
-    }
-
-    updateRecordById(id: number, data: any): Record {
-        let record = this.collection.find((element) => element.id == id)
-        if (record == undefined) {
-            throw new Error("ID not exists")
-        }
-        record.updateRecord(data)
-        return record
-    }
-
-    dataToRecord(data : any) : ExampleRecord {
-        return new ExampleRecord(data)
-    }
-
-    insert(record : Record) : number {
-        if (record instanceof ExampleRecord) {
-            record.id = this.nextId
-            this.nextId++
-            this.collection.push(record)
-            return record.id
-        }
-        throw new Error("This is not an ExampleRecord")
-    }
-
-    getRecordById(id : number) : Record {
-        let ret = this.collection.find((element) => element.id == id)
-        return ret
-    }
-
-    getAllRecords() : Record[] {
-        return this.collection;
-    }
-} 
 
 describe("Simple test cases", () => {
     let restApi : RestApi
@@ -204,12 +133,12 @@ describe("Simple test cases", () => {
     })
 
     describe("Handling two collections with constrains", () => {
-        let subCollection : VolatileRestSubCollection
+        let subCollection : VolatileRestCollection
         let subendpoint = "sub"+endpoint
 
         beforeEach(async () => {
-            collection = new VolatileRestCollection("/"+endpoint)
-            subCollection = new VolatileRestSubCollection("/"+subendpoint)
+            collection = new VolatileRestCollection("/"+endpoint, ExampleRecord)
+            subCollection = new VolatileRestCollection("/"+subendpoint, SubExampleRecord)
             
             restApi = new RestApi(3000)
             restApi.registerEndpoint(collection)
@@ -242,7 +171,7 @@ describe("Simple test cases", () => {
 
     describe("Handling a simple collection", () => {
         beforeEach(async () => {
-            collection = new VolatileRestCollection("/"+endpoint)
+            collection = new VolatileRestCollection("/"+endpoint, ExampleRecord)
             restApi = new RestApi(3000)
             restApi.registerEndpoint(collection)
             await restApi.start()

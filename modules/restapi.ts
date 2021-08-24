@@ -11,7 +11,7 @@ export interface Record {
 export interface RestCollection {
     get name() : string
     dataToRecord(data : any) : Record
-    insert(record : Record) : number
+    insert(data : any) : number
     getRecordById(id : number) : Record
     getAllRecordsByField(fieldname : string, fieldvalue : any) : Record[]
     deleteAllRecordsByField(fieldname : string, fieldvalue : any) : Number
@@ -103,7 +103,7 @@ export class RestApi {
 
             let id : number
             try {
-                id = restCollection.insert(record)
+                id = restCollection.insert(data)
             } catch {
                 res.send({"status": "data can't inserted"})
                 return
