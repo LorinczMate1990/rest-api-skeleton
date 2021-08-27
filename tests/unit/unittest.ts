@@ -91,8 +91,29 @@ describe("Simple test cases", () => {
             const subTestObject = {color: "red", ownerExampleId: 10}
             let stream = await POST(subendpoint, subTestObject)
             const obj = await stream.json()
-            ///////////////////////////// TODO EZ NAGYON ROSSZ
+
             expect(obj).to.deep.equals({ status: 'inserted', id: 0 });
+            expect(subCollection.collection.length).to.equals(1)
+        })
+
+        it("Delete the owner of a subRecord", async () =>{
+            const ownerObject = new ExampleRecord({name: "test", age: 13})
+            const ownerObject2 = new ExampleRecord({name: "test2", age: 14})
+            const userObject = new SubExampleRecord({color: "red", ownerExampleId: 10})
+            const userObject2 = new SubExampleRecord({color: "green", ownerExampleId: 11})
+            
+
+            ownerObject.id = 10
+            ownerObject2.id = 11
+            collection.collection.push(ownerObject)
+            collection.collection.push(ownerObject2)
+            subCollection.collection.push(userObject)
+            subCollection.collection.push(userObject2)
+            
+            let stream = await DELETE(endpoint+"/10")
+            const obj = await stream.json()
+
+            console.log("subCollection.collection:", subCollection.collection)
             expect(subCollection.collection.length).to.equals(1)
         })
     })
