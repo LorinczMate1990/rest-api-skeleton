@@ -30,7 +30,10 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
-        
+
+      - name: Install Typescript
+        run: npm install typescript
+
       - name: Run unittests
         run: npm test
 
