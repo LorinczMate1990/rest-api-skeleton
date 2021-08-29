@@ -1,14 +1,11 @@
 # This is a basic workflow to help you get started with Actions
 
-name: CI
+name: Create a release
 
 # Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the main branch
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+  release:
+    types: [created]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -25,21 +22,19 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
+      - name: Use Node.js 15.x
+        uses: actions/setup-node@v2
+        with:
+          node-version: 15.x
+          registry-url: 'https://registry.npmjs.org'
 
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
-        run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
-          
       - name: Install dependencies
-        run: npm install
-        
-      - name: Compile unittests
-        run: tsc --esModuleInterop -t es5 tests/unit/unittest.ts
+        run: npm ci
         
       - name: Run unittests
-        run: npx mocha tests/unit/unittest.js
+        run: npm test
+
+      - name: Publish the package
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
