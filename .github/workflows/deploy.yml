@@ -31,11 +31,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install Typescript
-        run: npm install typescript
-
+      - name: Compile unittests
+        run: tsc --esModuleInterop -t es5 tests/unit/unittest.ts
+        
       - name: Run unittests
-        run: npm test
+        run: npx mocha tests/unit/unittest.js
 
       - name: Publish the package
         run: npm publish --access public
