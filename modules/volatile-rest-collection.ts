@@ -8,17 +8,19 @@ export class VolatileRestCollection implements RestCollection {
     private SpecificRecord : new (data: any) => Record
 
     get name(): string {
-        this.collection = [];
         return this._name
     }
     
     constructor(name : string, SpecificRecord : new (data: any) => Record) {
+        this.collection = [];
         this._name = name
         this.nextId = 0 
         this.SpecificRecord = SpecificRecord
     }
     getAllRecordsByField(fieldname: string, fieldvalue: any): Record[] {
-        return this.collection.filter((record) => record[fieldname] == fieldvalue)
+        const filteredCollection = this.collection.filter((record) => record[fieldname] == fieldvalue)
+        const copiedRecords = filteredCollection.map((record : Record) => new this.SpecificRecord(record.toData()))
+        return copiedRecords;
     }
     deleteAllRecordsByField(fieldname: string, fieldvalue: any): Number {
         const originalLength = this.collection.length
@@ -65,10 +67,10 @@ export class VolatileRestCollection implements RestCollection {
 
     getRecordById(id : number) : Record {
         let ret = this.collection.find((element) => element.id == id)
-        return ret
+        return new this.SpecificRecord(ret.toData())
     }
 
     getAllRecords() : Record[] {
-        return this.collection;
+        return this.collection.map((record : Record) => new this.SpecificRecord(record.toData()));
     }
 }
