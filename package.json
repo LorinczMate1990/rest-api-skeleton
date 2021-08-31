@@ -8,7 +8,8 @@
     "url": "https://github.com/LorinczMate1990/rest-api-skeleton.git"
   },
   "scripts": {
-    "test": "tsc --esModuleInterop -t es5 tests/unit/unittest.ts && npx mocha tests/unit/unittest.js"
+    "test": "tsc --esModuleInterop -t es5 tests/unit/unittest.ts && npx mocha tests/unit/unittest.js",
+    "build": "tsc --esModuleInterop -t es5 index.ts"
   },
   "author": "",
   "license": "ISC",
