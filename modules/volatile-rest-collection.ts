@@ -66,7 +66,11 @@ export class VolatileRestCollection implements RestCollection {
     }
 
     getRecordById(id : number) : Record {
+        console.log("COLLECTION: ", this.collection)
         let ret = this.collection.find((element) => element.id == id)
+        if (ret === undefined) {
+            return undefined
+        }
         return new this.SpecificRecord(ret.toData())
     }
 

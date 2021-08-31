@@ -11,6 +11,9 @@ class ExampleRecord implements Record {
     constructor(data : any) {
         this.name = data.name
         this.age = data.age
+        if (data.id !== undefined) {
+            this.id = data.id
+        }
     }
 
     updateRecord(data: any): void {
@@ -151,6 +154,7 @@ describe("Simple test cases", () => {
             collection.collection.push(testObject)
             collection.collection.push(testObject2)
             let obj = await (await GET(endpoint)).json()
+            console.log("Object: ", obj)
             expect(obj).to.be.an('array').that.deep.equals([testObject.toData(), testObject2.toData()]);
             obj = await (await GET(endpoint+"/0")).json()
             expect(obj).to.be.deep.equals(testObject.toData());
