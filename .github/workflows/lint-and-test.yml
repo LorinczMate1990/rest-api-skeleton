@@ -8,7 +8,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        nodejs: [10, 12, 14]
+        nodejs: [12, 14]
 
     steps:
     - uses: actions/checkout@v2
@@ -18,6 +18,8 @@ jobs:
       with:
         node-version: ${{ matrix.nodejs }}
 
-    - run: yarn install
-    - run: yarn test
-    - run: yarn build-all
+    - name: Install dependencies
+      run: yarn install
+    
+    - name: Test the code
+      run: yarn test
